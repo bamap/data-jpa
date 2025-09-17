@@ -5,7 +5,7 @@
 
     <groupId>ir.bamap.blu</groupId>
     <artifactId>data-jpa</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <packaging>jar</packaging>
 
@@ -24,13 +24,13 @@
     <scm>
         <connection>scm:git:git://github.com/bamap/data-jpa.git</connection>
         <developerConnection>scm:git:ssh://github.com:bamap/data-jpa.git</developerConnection>
-        <url>http://github.com/bamap/data-jpa/tree/master</url>
+        <url>https://github.com/bamap/data-jpa/tree/main</url>
     </scm>
 
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
         </license>
     </licenses>
 
@@ -47,6 +47,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <model.version>1.1.0</model.version>
         <hibernate.version>6.6.26.Final</hibernate.version>
         <spring-data-jpa.version>3.5.3</spring-data-jpa.version>
 
@@ -59,7 +60,7 @@
         <dependency>
             <groupId>ir.bamap.blu</groupId>
             <artifactId>model</artifactId>
-            <version>1.0.1</version>
+            <version>${model.version}</version>
         </dependency>
 
         <dependency>
