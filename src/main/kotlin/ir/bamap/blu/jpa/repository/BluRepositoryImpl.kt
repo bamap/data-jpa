@@ -241,7 +241,7 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
 
         val criteriaQuery = criteriaBuilder.createQuery(Long::class.java)
         val root = criteriaQuery.from(cls)
-        criteriaQuery.select(criteriaBuilder.count(root)).distinct(false)
+        criteriaQuery.select(criteriaBuilder.countDistinct(root))
 
         val predicates = specification.getPredicates(criteriaBuilder, root as Root<Entity>, criteriaQuery, filters)
 
