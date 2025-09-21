@@ -4,7 +4,9 @@ import ir.bamap.blu.exception.NotSupportedException
 import ir.bamap.blu.model.OrderModel
 import ir.bamap.blu.model.filter.*
 import jakarta.persistence.criteria.*
+import org.springframework.cglib.core.Local
 import org.springframework.data.jpa.domain.Specification
+import java.time.LocalDate
 import java.util.*
 
 open class QuerySpecification<Entity> {
@@ -120,6 +122,7 @@ open class QuerySpecification<Entity> {
             is Char -> builder.between(path as Path<Char>, lower.toString()[0], upper)
             is String -> builder.between(path as Path<String>, lower.toString(), upper)
             is Date -> builder.between(path as Path<Date>, lower as Date, upper)
+            is LocalDate -> builder.between(path as Path<LocalDate>, lower as LocalDate, upper)
             else -> throw NotSupportedException(upper.javaClass, "BETWEEN_PREDICATE")
         }
     }
@@ -145,6 +148,7 @@ open class QuerySpecification<Entity> {
         val path = getPath(root, filter)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.lessThan(path as Path<Date>, literal)
+            is LocalDate -> builder.lessThan(path as Path<LocalDate>, literal)
             is Int -> builder.lessThan(path as Path<Int>, literal)
             is Long -> builder.lessThan(path as Path<Long>, literal)
             is Double -> builder.lessThan(path as Path<Double>, literal)
@@ -164,6 +168,7 @@ open class QuerySpecification<Entity> {
         val path = getPath(root, filter)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.lessThanOrEqualTo(path as Path<Date>, literal)
+            is LocalDate -> builder.lessThanOrEqualTo(path as Path<LocalDate>, literal)
             is Int -> builder.lessThanOrEqualTo(path as Path<Int>, literal)
             is Long -> builder.lessThanOrEqualTo(path as Path<Long>, literal)
             is Double -> builder.lessThanOrEqualTo(path as Path<Double>, literal)
@@ -183,6 +188,7 @@ open class QuerySpecification<Entity> {
         val path = getPath(root, filter)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.greaterThanOrEqualTo(path as Path<Date>, literal)
+            is LocalDate -> builder.greaterThanOrEqualTo(path as Path<LocalDate>, literal)
             is Int -> builder.greaterThanOrEqualTo(path as Path<Int>, literal)
             is Long -> builder.greaterThanOrEqualTo(path as Path<Long>, literal)
             is Double -> builder.greaterThanOrEqualTo(path as Path<Double>, literal)
@@ -202,6 +208,7 @@ open class QuerySpecification<Entity> {
         val path = getPath(root, filter)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.greaterThan(path as Path<Date>, literal)
+            is LocalDate -> builder.greaterThan(path as Path<LocalDate>, literal)
             is Int -> builder.greaterThan(path as Path<Int>, literal)
             is Long -> builder.greaterThan(path as Path<Long>, literal)
             is Double -> builder.greaterThan(path as Path<Double>, literal)
@@ -244,6 +251,7 @@ open class QuerySpecification<Entity> {
             is Float -> return root.get<Float>(property)
             is String -> return root.get<String>(property)
             is Date -> return root.get<Date>(property)
+            is LocalDate -> return root.get<LocalDate>(property)
             is Char -> return root.get<Char>(property)
             is Number -> return root.get<Number>(property)
         }
