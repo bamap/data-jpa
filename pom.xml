@@ -48,8 +48,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <model.version>1.1.0</model.version>
-        <hibernate.version>6.6.26.Final</hibernate.version>
-        <spring-data-jpa.version>3.5.3</spring-data-jpa.version>
+        <hibernate.version>6.6.29.Final</hibernate.version>
+        <spring-data-jpa.version>3.5.4</spring-data-jpa.version>
 
         <skip.source>false</skip.source>
         <skip.javadoc>false</skip.javadoc>
