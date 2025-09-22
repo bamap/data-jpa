@@ -74,10 +74,9 @@ open class QuerySpecification<Entity> {
         if (filter is NotFilter)
             return builder.not(getPredicate(builder, root, query, filter.filter))
 
-        val path = getPath(root, filter)
         return when (filter) {
-            is IsNull -> builder.isNull(path)
-            is IsNotNull -> builder.isNotNull(path)
+            is IsNull -> builder.isNull(getPath(root, filter.propertyName))
+            is IsNotNull -> builder.isNotNull(getPath(root, filter.propertyName))
             else -> throw NotSupportedException(filter.javaClass, "GET_PREDICATE")
         }
     }
@@ -89,10 +88,16 @@ open class QuerySpecification<Entity> {
     ): Predicate {
         val literal = getLiteral(filter)
         return when (filter) {
-            is NotEqual -> criteriaBuilder.notEqual(getPath(root, filter), literal)
-            is Equal -> criteriaBuilder.equal(getPath(root, filter), literal)
-            is Like -> criteriaBuilder.like(getPath(root, filter) as Path<String>, literal.toString())
-            is NotLike -> criteriaBuilder.notLike(getPath(root, filter) as Path<String>, literal.toString())
+            is NotEqual -> criteriaBuilder.notEqual(getPath(root, filter.propertyName, filter.literal), literal)
+            is Equal -> criteriaBuilder.equal(getPath(root, filter.propertyName, filter.literal), literal)
+            is Like -> criteriaBuilder.like(
+                getPath(root, filter.propertyName, filter.literal) as Path<String>,
+                literal.toString()
+            )
+            is NotLike -> criteriaBuilder.notLike(
+                getPath(root, filter.propertyName, filter.literal) as Path<String>,
+                literal.toString()
+            )
             is LessThan -> getLessThanPredicate(criteriaBuilder, root, filter)
             is LessThanOrEqualTo -> getLessThanOrEqualToPredicate(criteriaBuilder, root, filter)
             is GreaterThanOrEqualTo -> getGreaterThanOrEqualToPredicate(criteriaBuilder, root, filter)
@@ -106,7 +111,7 @@ open class QuerySpecification<Entity> {
         root: Root<U>,
         filter: Between
     ): Predicate {
-        val path = getPath(root, filter)
+        val path = getPath(root, filter.propertyName, filter.lowerBoundary)
         val upper = filter.upperBoundary
         val lower = filter.lowerBoundary
 
@@ -145,7 +150,7 @@ open class QuerySpecification<Entity> {
         root: Root<U>,
         filter: LessThan
     ): Predicate {
-        val path = getPath(root, filter)
+        val path = getPath(root, filter.propertyName, filter.literal)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.lessThan(path as Path<Date>, literal)
             is LocalDate -> builder.lessThan(path as Path<LocalDate>, literal)
@@ -165,7 +170,7 @@ open class QuerySpecification<Entity> {
         root: Root<U>,
         filter: LessThanOrEqualTo
     ): Predicate {
-        val path = getPath(root, filter)
+        val path = getPath(root, filter.propertyName, filter.literal)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.lessThanOrEqualTo(path as Path<Date>, literal)
             is LocalDate -> builder.lessThanOrEqualTo(path as Path<LocalDate>, literal)
@@ -185,7 +190,7 @@ open class QuerySpecification<Entity> {
         root: Root<U>,
         filter: GreaterThanOrEqualTo
     ): Predicate {
-        val path = getPath(root, filter)
+        val path = getPath(root, filter.propertyName, filter.literal)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.greaterThanOrEqualTo(path as Path<Date>, literal)
             is LocalDate -> builder.greaterThanOrEqualTo(path as Path<LocalDate>, literal)
@@ -205,7 +210,7 @@ open class QuerySpecification<Entity> {
         root: Root<U>,
         filter: GreaterThan
     ): Predicate {
-        val path = getPath(root, filter)
+        val path = getPath(root, filter.propertyName, filter.literal)
         return when (val literal = getLiteral(filter)) {
             is Date -> builder.greaterThan(path as Path<Date>, literal)
             is LocalDate -> builder.greaterThan(path as Path<LocalDate>, literal)
@@ -220,6 +225,32 @@ open class QuerySpecification<Entity> {
         }
     }
 
+    protected open fun getPath(root: Path<*>, propertyName: String, propertyValue: Any? = null): Path<*> {
+        val propertyNames = propertyName.split(".")
+
+        if (propertyNames.size > 1) {
+            val nestedRoot = propertyNames.take(propertyNames.size - 2)
+                .fold(root) { acc, element -> acc.get<Any>(element) }
+
+            return getPath(nestedRoot, propertyNames.last(), propertyValue)
+        }
+
+        return when (propertyValue) {
+            null -> return root.get<Any>(propertyName)
+            is Int -> return root.get<Int>(propertyName)
+            is Long -> return root.get<Long>(propertyName)
+            is Double -> return root.get<Double>(propertyName)
+            is Float -> return root.get<Float>(propertyName)
+            is String -> return root.get<String>(propertyName)
+            is Date -> return root.get<Date>(propertyName)
+            is LocalDate -> return root.get<LocalDate>(propertyName)
+            is Char -> return root.get<Char>(propertyName)
+            is Number -> return root.get<Number>(propertyName)
+            else -> root.get<Any>(propertyName)
+        }
+    }
+
+    @Deprecated("Use getPath(root, propertyName, propertyValue) instead")
     protected open fun getPath(root: Root<*>, filter: FilterModel): Path<*> {
         return when (filter) {
             is IsNull -> root.get<Any>(filter.propertyName)
@@ -239,10 +270,7 @@ open class QuerySpecification<Entity> {
         }
     }
 
-    protected open fun getLiteral(filter: ComparativeOperatorFilter): Any {
-        return filter.literal
-    }
-
+    @Deprecated("Use getPath(root, propertyName, propertyValue) instead")
     protected open fun getPathByValue(root: Root<*>, property: String, value: Any): Path<*> {
         when (value) {
             is Int -> return root.get<Int>(property)
@@ -257,5 +285,9 @@ open class QuerySpecification<Entity> {
         }
 
         return root.get<Any>(property)
+    }
+
+    protected open fun getLiteral(filter: ComparativeOperatorFilter): Any {
+        return filter.literal
     }
 }
