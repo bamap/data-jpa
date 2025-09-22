@@ -229,7 +229,7 @@ open class QuerySpecification<Entity> {
         val propertyNames = propertyName.split(".")
 
         if (propertyNames.size > 1) {
-            val nestedRoot = propertyNames.take(propertyNames.size - 2)
+            val nestedRoot = propertyNames.take(propertyNames.size - 1)
                 .fold(root) { acc, element -> acc.get<Any>(element) }
 
             return getPath(nestedRoot, propertyNames.last(), propertyValue)
