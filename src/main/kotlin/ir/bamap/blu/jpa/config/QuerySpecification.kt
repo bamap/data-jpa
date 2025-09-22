@@ -39,11 +39,11 @@ open class QuerySpecification<Entity> {
     }
 
     protected open fun getOrder(criteriaBuilder: CriteriaBuilder, root: Root<*>, sortModel: OrderModel): Order {
+        val path = getPath(root, sortModel.propertyName)
         return if (sortModel.direction == OrderModel.Direction.ASC)
-            criteriaBuilder.asc(root.get<Any>(sortModel.propertyName))
+            criteriaBuilder.asc(path)
         else
-            criteriaBuilder.desc(root.get<Any>(sortModel.propertyName))
-
+            criteriaBuilder.desc(path)
     }
 
     protected open fun <U : Entity> getPredicate(
