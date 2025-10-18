@@ -52,6 +52,9 @@ open class QuerySpecification<Entity> {
         query: CriteriaQuery<*>?,
         filter: FilterModel
     ): Predicate {
+        if (filter is ClassFilter)
+            return builder.equal(root.type(), filter.cls)
+
         if (filter is GroupFilter) {
 
             val filters = getPredicates(builder, root, query, filter.filters).toTypedArray()
@@ -94,10 +97,12 @@ open class QuerySpecification<Entity> {
                 getPath(root, filter.propertyName, filter.literal) as Path<String>,
                 literal.toString()
             )
+
             is NotLike -> criteriaBuilder.notLike(
                 getPath(root, filter.propertyName, filter.literal) as Path<String>,
                 literal.toString()
             )
+
             is LessThan -> getLessThanPredicate(criteriaBuilder, root, filter)
             is LessThanOrEqualTo -> getLessThanOrEqualToPredicate(criteriaBuilder, root, filter)
             is GreaterThanOrEqualTo -> getGreaterThanOrEqualToPredicate(criteriaBuilder, root, filter)
