@@ -17,6 +17,6 @@ Add the dependency to your project:
 <dependency>
     <groupId>ir.bamap.blu</groupId>
     <artifactId>data-jpa</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.4</version>
 </dependency>
 ```
