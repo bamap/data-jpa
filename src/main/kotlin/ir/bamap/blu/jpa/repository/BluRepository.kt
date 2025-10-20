@@ -86,6 +86,9 @@ interface BluRepository<Entity: Any, ID: Serializable>
 
     fun findBy(orders: Orders, vararg filters: FilterModel): List<Entity>
 
+    fun findIdsBy(vararg filters: FilterModel): Set<ID>
+    fun findIdsBy(filters: Collection<FilterModel>): Set<ID>
+
     fun <U : Entity> findBy(cls: Class<U>, vararg filters: FilterModel): List<U>
 
     fun <U : Entity> findBy(cls: Class<U>, orders: Orders, vararg filters: FilterModel): List<U>

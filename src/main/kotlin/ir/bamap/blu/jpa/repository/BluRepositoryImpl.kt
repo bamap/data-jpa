@@ -138,14 +138,18 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
 
         val root = criteriaQuery.from(cls)
 
-        val predicate = this.specification.getSpecification(filters.toList())
-            .toPredicate(root as Root<Entity?>, criteriaQuery, criteriaBuilder)
+        if (filters.isNotEmpty()) {
+            val predicate = this.specification.getSpecification(filters.toList())
+                .toPredicate(root as Root<Entity?>, criteriaQuery, criteriaBuilder)
 
-        if (predicate != null)
-            criteriaQuery.where(predicate)
+            if (predicate != null)
+                criteriaQuery.where(predicate)
+        }
 
-        val setOrders = this.specification.getOrders(criteriaBuilder, root, orders)
-        criteriaQuery.orderBy(*setOrders.toTypedArray())
+        if (orders.isNotEmpty()) {
+            val ordersList = this.specification.getOrders(criteriaBuilder, root, orders)
+            criteriaQuery.orderBy(*ordersList.toTypedArray())
+        }
 
         return criteriaQuery
     }
@@ -154,6 +158,30 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
     override fun findBy(vararg filters: FilterModel): List<Entity> = findBy(cls, *filters)
 
     override fun findBy(orders: Orders, vararg filters: FilterModel): List<Entity> = findBy(cls, orders, *filters)
+
+    override fun findIdsBy(vararg filters: FilterModel): Set<ID> {
+        val criteriaBuilder = entityManager.criteriaBuilder
+        val criteriaQuery = criteriaBuilder.createQuery()
+        val root = criteriaQuery.from(cls)
+
+        val idPath = root.get<ID>(getIdProperty())
+        criteriaQuery.select(idPath)
+
+        if (filters.isNotEmpty()) {
+            val predicate = specification.getSpecification(filters.toList())
+                .toPredicate(root, criteriaQuery, criteriaBuilder)
+            if (predicate != null)
+                criteriaQuery.where(predicate)
+        }
+
+        return entityManager.createQuery(criteriaQuery).resultList
+            .map { it as ID }
+            .toSet()
+    }
+
+    override fun findIdsBy(filters: Collection<FilterModel>): Set<ID> {
+        return findIdsBy(*filters.toTypedArray())
+    }
 
     override fun <U : Entity> findBy(cls: Class<U>, vararg filters: FilterModel): List<U> =
         findBy(cls, Orders(), *filters)
@@ -243,9 +271,11 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
         val root = criteriaQuery.from(cls)
         criteriaQuery.select(criteriaBuilder.countDistinct(root))
 
-        val predicates = specification.getPredicates(criteriaBuilder, root as Root<Entity>, criteriaQuery, filters)
+        if (filters.isNotEmpty()) {
+            val predicates = specification.getPredicates(criteriaBuilder, root as Root<Entity>, criteriaQuery, filters)
+            criteriaQuery.where(*predicates.toTypedArray())
+        }
 
-        criteriaQuery.where(*predicates.toTypedArray())
 
         return entityManager.createQuery(criteriaQuery).singleResult
     }
@@ -286,16 +316,19 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
 
         val root = criteriaQuery.from(cls)
 
-        val specification = specification.getSpecification(searchModel.filters)
-        val predicate = specification.toPredicate(root as Root<Entity?>, criteriaQuery, criteriaBuilder)
-        if (predicate != null)
-            criteriaQuery.where(predicate)
+        if (searchModel.filters.isNotEmpty()) {
+            val specification = specification.getSpecification(searchModel.filters)
+            val predicate = specification.toPredicate(root as Root<Entity?>, criteriaQuery, criteriaBuilder)
+            if (predicate != null)
+                criteriaQuery.where(predicate)
+        }
 
-        val orders = this.specification.getOrders(criteriaBuilder, root, searchModel.orders)
-        criteriaQuery.orderBy(orders)
+        if (searchModel.orders.isNotEmpty()) {
+            val orders = this.specification.getOrders(criteriaBuilder, root, searchModel.orders)
+            criteriaQuery.orderBy(orders)
+        }
 
         val typedQuery = entityManager.createQuery(criteriaQuery)
-
         typedQuery.firstResult = getFirstResult(searchModel)
 
         if (searchModel.limit > 0)
