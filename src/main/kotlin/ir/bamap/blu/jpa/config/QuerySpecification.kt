@@ -40,10 +40,22 @@ open class QuerySpecification<Entity> {
 
     protected open fun getOrder(criteriaBuilder: CriteriaBuilder, root: Root<*>, sortModel: OrderModel): Order {
         val path = getPath(root, sortModel.propertyName)
+        if (sortModel.cases.isEmpty())
+            return if (sortModel.direction == OrderModel.Direction.ASC)
+                criteriaBuilder.asc(path)
+            else
+                criteriaBuilder.desc(path)
+
+        val orderCase = criteriaBuilder.selectCase<Int>()
+        sortModel.cases.forEachIndexed { index, case ->
+            orderCase.`when`(criteriaBuilder.equal(path, case), index)
+        }
+        orderCase.otherwise(sortModel.cases.size)
+
         return if (sortModel.direction == OrderModel.Direction.ASC)
-            criteriaBuilder.asc(path)
+            criteriaBuilder.asc(orderCase)
         else
-            criteriaBuilder.desc(path)
+            criteriaBuilder.desc(orderCase)
     }
 
     protected open fun <U : Entity> getPredicate(
