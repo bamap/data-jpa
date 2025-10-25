@@ -6,7 +6,7 @@ Depending on the Spring Boot version you are using, you need to use this version
 | Data JPA Library | Spring Boot | Kotlin | Java | Hibernate    | Spring Data JPA |
 |------------------|-------------|--------|------|--------------|-----------------|
 | 1.0.x            | 3.5.6       | 1.9.25 | 17   | 6.6.29.Final | 3.5.3           |
-| 1.1.x            | 3.5.6       | 1.9.25 | 17   | 6.6.29.Final | 3.5.3           |
+| 1.1.x            | 3.5.6       | 1.9.25 | 17   | 6.6.33.Final | 3.5.5           |
 
 
 ## Usage
@@ -17,6 +17,6 @@ Add the dependency to your project:
 <dependency>
     <groupId>ir.bamap.blu</groupId>
     <artifactId>data-jpa</artifactId>
-    <version>1.1.5</version>
+    <version>1.1.8</version>
 </dependency>
 ```
