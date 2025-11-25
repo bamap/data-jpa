@@ -1,6 +1,6 @@
 package ir.bamap.blu.jpa.config
 
-import ir.bamap.blu.exception.NotSupportedException
+import ir.bamap.blu.exception.NotSupportedTypeException
 import ir.bamap.blu.model.OrderModel
 import ir.bamap.blu.model.filter.*
 import jakarta.persistence.criteria.*
@@ -92,7 +92,7 @@ open class QuerySpecification<Entity> {
         return when (filter) {
             is IsNull -> builder.isNull(getPath(root, filter.propertyName))
             is IsNotNull -> builder.isNotNull(getPath(root, filter.propertyName))
-            else -> throw NotSupportedException(filter.javaClass, "GET_PREDICATE")
+            else -> throw NotSupportedTypeException(filter.javaClass, "GET_PREDICATE")
         }
     }
 
@@ -119,7 +119,7 @@ open class QuerySpecification<Entity> {
             is LessThanOrEqualTo -> getLessThanOrEqualToPredicate(criteriaBuilder, root, filter)
             is GreaterThanOrEqualTo -> getGreaterThanOrEqualToPredicate(criteriaBuilder, root, filter)
             is GreaterThan -> getGreaterThanPredicate(criteriaBuilder, root, filter)
-            else -> throw NotSupportedException(filter.javaClass, "COMPARATIVE_PREDICATE")
+            else -> throw NotSupportedTypeException(filter.javaClass, "COMPARATIVE_PREDICATE")
         }
     }
 
@@ -133,7 +133,7 @@ open class QuerySpecification<Entity> {
         val lower = filter.lowerBoundary
 
         if (filter is NotBetween)
-            throw NotSupportedException(filter.javaClass, "NOT_BETWEEN_PREDICATE")
+            throw NotSupportedTypeException(filter.javaClass, "NOT_BETWEEN_PREDICATE")
 
         return when (upper) {
             is Int -> builder.between(path as Path<Int>, lower.toString().toInt(), upper)
@@ -146,7 +146,7 @@ open class QuerySpecification<Entity> {
             is Date -> builder.between(path as Path<Date>, lower as Date, upper)
             is LocalDate -> builder.between(path as Path<LocalDate>, lower as LocalDate, upper)
             is LocalDateTime -> builder.between(path as Path<LocalDateTime>, lower as LocalDateTime, upper)
-            else -> throw NotSupportedException(upper.javaClass, "BETWEEN_PREDICATE")
+            else -> throw NotSupportedTypeException(upper.javaClass, "BETWEEN_PREDICATE")
         }
     }
 
@@ -180,7 +180,7 @@ open class QuerySpecification<Entity> {
             is Short -> builder.lessThan(path as Path<Short>, literal)
             is Char -> builder.lessThan(path as Path<Char>, literal)
             is String -> builder.lessThan(path as Path<String>, literal)
-            else -> throw NotSupportedException(literal.javaClass, "LESS_PREDICATE")
+            else -> throw NotSupportedTypeException(literal.javaClass, "LESS_PREDICATE")
         }
     }
 
@@ -201,7 +201,7 @@ open class QuerySpecification<Entity> {
             is Short -> builder.lessThanOrEqualTo(path as Path<Short>, literal)
             is Char -> builder.lessThanOrEqualTo(path as Path<Char>, literal)
             is String -> builder.lessThanOrEqualTo(path as Path<String>, literal)
-            else -> throw NotSupportedException(literal.javaClass, "LESS_EQUAL_PREDICATE")
+            else -> throw NotSupportedTypeException(literal.javaClass, "LESS_EQUAL_PREDICATE")
         }
     }
 
@@ -222,7 +222,7 @@ open class QuerySpecification<Entity> {
             is Short -> builder.greaterThanOrEqualTo(path as Path<Short>, literal)
             is Char -> builder.greaterThanOrEqualTo(path as Path<Char>, literal)
             is String -> builder.greaterThanOrEqualTo(path as Path<String>, literal)
-            else -> throw NotSupportedException(literal.javaClass, "GREATER_EQUAL_PREDICATE")
+            else -> throw NotSupportedTypeException(literal.javaClass, "GREATER_EQUAL_PREDICATE")
         }
     }
 
@@ -243,7 +243,7 @@ open class QuerySpecification<Entity> {
             is Short -> builder.greaterThan(path as Path<Short>, literal)
             is Char -> builder.greaterThan(path as Path<Char>, literal)
             is String -> builder.greaterThan(path as Path<String>, literal)
-            else -> throw NotSupportedException(literal.javaClass, "GREATER_PREDICATE")
+            else -> throw NotSupportedTypeException(literal.javaClass, "GREATER_PREDICATE")
         }
     }
 
@@ -289,7 +289,7 @@ open class QuerySpecification<Entity> {
             is Like -> root.get<String>(filter.propertyName)
             is NotLike -> root.get<String>(filter.propertyName)
 
-            else -> throw NotSupportedException(filter.javaClass, "GET_PATH")
+            else -> throw NotSupportedTypeException(filter.javaClass, "GET_PATH")
         }
     }
 
