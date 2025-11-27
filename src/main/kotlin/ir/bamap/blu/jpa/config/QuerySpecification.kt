@@ -73,7 +73,10 @@ open class QuerySpecification<Entity> {
 
             return when (filter) {
                 is NotOr -> builder.not(builder.or(*filters))
-                else -> builder.or(*filters)
+                is NotAnd -> builder.not(builder.and(*filters))
+                is And -> builder.and(*filters)
+                is Or -> builder.or(*filters)
+                else -> throw NotSupportedTypeException(filter::class.java, "DATA_JPA_GET_PREDICATE")
             }
         }
 
