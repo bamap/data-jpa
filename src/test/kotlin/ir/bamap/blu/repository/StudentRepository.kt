@@ -5,5 +5,5 @@ import ir.bamap.blu.jpa.repository.BluRepositoryImpl
 import org.springframework.stereotype.Repository
 
 @Repository
-class StudentRepository: BluRepositoryImpl<Student, Long>(Student::class.java) {
+open class StudentRepository: BluRepositoryImpl<Student, Long>(Student::class.java) {
 }

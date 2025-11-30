@@ -5,12 +5,12 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 
 @Entity
-class Student(
-    val firstname: String,
-    val lastname: String,
+open class Student(
+    open val firstname: String = "Ali",
+    open val lastname: String = "Malvandi",
 
     @Id
     @GeneratedValue
-    val id: Long = 0
+    open val id: Long = 0
 ) {
 }
