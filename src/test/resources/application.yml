@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+#logging:
+#  structured:
+#    format:
+#      console: ecs
