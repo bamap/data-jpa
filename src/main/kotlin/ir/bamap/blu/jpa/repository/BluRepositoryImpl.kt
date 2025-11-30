@@ -140,7 +140,7 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
 
         if (filters.isNotEmpty()) {
             val predicate = this.specification.getSpecification(filters.toList())
-                .toPredicate(root as Root<Entity?>, criteriaQuery, criteriaBuilder)
+                .toPredicate(root as Root<Entity>, criteriaQuery, criteriaBuilder)
 
             if (predicate != null)
                 criteriaQuery.where(predicate)
@@ -318,7 +318,7 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
 
         if (searchModel.filters.isNotEmpty()) {
             val specification = specification.getSpecification(searchModel.filters)
-            val predicate = specification.toPredicate(root as Root<Entity?>, criteriaQuery, criteriaBuilder)
+            val predicate = specification.toPredicate(root as Root<Entity>, criteriaQuery, criteriaBuilder)
             if (predicate != null)
                 criteriaQuery.where(predicate)
         }

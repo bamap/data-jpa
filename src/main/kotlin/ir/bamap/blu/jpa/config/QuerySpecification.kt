@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-open class QuerySpecification<Entity> {
+open class QuerySpecification<Entity: Any> {
     open fun getSpecification(filters: Collection<FilterModel>): Specification<Entity> {
         return Specification { root: Root<Entity>, query: CriteriaQuery<*>?, builder: CriteriaBuilder ->
             val predicates: List<Predicate> = getPredicates(builder, root, query, filters)
