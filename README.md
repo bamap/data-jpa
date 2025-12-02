@@ -49,57 +49,51 @@ dependencies {
 
 ## Example Entity
 
-Define a base `Machine` entity using JPA SINGLE_TABLE inheritance with useful concrete subtypes:
+Define a base `Vehicle` entity using JPA SINGLE_TABLE inheritance with concrete subtypes:
 
 ```kotlin
 import jakarta.persistence.*
-import java.math.BigDecimal
-import java.time.LocalDateTime
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
-abstract class Machine(
+@DiscriminatorColumn(name = "vehicle_type", discriminatorType = DiscriminatorType.STRING)
+open class Vehicle(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-
-    val name: String,
-
-    val price: BigDecimal,
-
-    val manufacturedAt: LocalDateTime,
-
-    val isActive: Boolean = true
+    val brand: String,
+    val model: String,
+    val fuelCapacity: Int
 )
 
 @Entity
-@DiscriminatorValue("CNC_MACHINE")
-data class CncMachine(
-    val name: String,
-    val price: BigDecimal,
-    val manufacturedAt: LocalDateTime,
-    val isActive: Boolean = true,
-    val spindleSpeed: Int  // Subtype-specific field
-) : Machine(0L, name, price, manufacturedAt, isActive)
+@DiscriminatorValue("CAR")
+class Car(
+    id: Long = 0,
+    brand: String,
+    model: String,
+    fuelCapacity: Int,
+    val passengers: Int
+) : Vehicle(id, brand, model, fuelCapacity)
 
 @Entity
-@DiscriminatorValue("LATHE")
-data class LatheMachine(
-    val name: String,
-    val price: BigDecimal,
-    val manufacturedAt: LocalDateTime,
-    val isActive: Boolean = true
-) : Machine(0L, name, price, manufacturedAt, isActive)
+@DiscriminatorValue("TRUCK")
+class Truck(
+    id: Long = 0,
+    brand: String,
+    model: String,
+    fuelCapacity: Int,
+    val cargoWeight: Int
+) : Vehicle(id, brand, model, fuelCapacity)
 
 @Entity
-@DiscriminatorValue("MILLING_MACHINE")
-data class MillingMachine(
-    val name: String,
-    val price: BigDecimal,
-    val manufacturedAt: LocalDateTime,
-    val isActive: Boolean = true
-) : Machine(0L, name, price, manufacturedAt, isActive)
+@DiscriminatorValue("BUS")
+class Bus(
+    id: Long = 0,
+    brand: String,
+    model: String,
+    fuelCapacity: Int,
+    val passengersCount: Int
+) : Vehicle(id, brand, model, fuelCapacity)
 ```
 
 ## Repository
@@ -111,8 +105,8 @@ import ir.bamap.blu.jpa.repository.BluRepositoryImpl
 import org.springframework.stereotype.Repository
 
 @Repository
-class MachineRepository : 
-    BluRepositoryImpl<Machine, Long>(Machine::class.java) {
+class VehicleRepository : 
+    BluRepositoryImpl<Vehicle, Long>(Vehicle::class.java) {
     // Optionally override methods like getIdProperty() if needed
 }
 ```
@@ -126,9 +120,9 @@ import ir.bamap.blu.jpa.service.BluDbService
 import org.springframework.stereotype.Service
 
 @Service
-class MachineService(
-    repository: MachineRepository
-) : BluDbService<Machine, Long>(repository)
+class VehicleService(
+    repository: VehicleRepository
+) : BluDbService<Vehicle, Long>(repository)
 ```
 
 ## Query Examples
@@ -145,25 +139,25 @@ import ir.bamap.blu.model.filter.Orders as Orders // Alias if needed
 
 ```kotlin
 @Autowired
-lateinit var repository: MachineRepository
+lateinit var repository: VehicleRepository
 
-// All active machines
-val active = repository.findBy(Equal("isActive", true))
+// All vehicles with high fuel capacity
+val highCapacity = repository.findBy(GreaterThan("fuelCapacity", 50))
 
-// CNC machines using ClassFilter
-val cncs = repository.findBy(ClassFilter(CncMachine::class.java))
+// Cars using ClassFilter
+val cars = repository.findBy(ClassFilter(Car::class.java))
 
-// Lathe machines using cls parameter (typed result)
-val lathes: List<LatheMachine> = repository.findBy(LatheMachine::class.java)
+// Trucks using cls parameter (typed result)
+val trucks: List<Truck> = repository.findBy(Truck::class.java)
 
-// Name contains "CNC"
-val matching = repository.findBy(Like("name", "%CNC%"))
+// Models containing "Toyota"
+val matching = repository.findBy(Like("model", "%Toyota%"))
 
-// Multiple filters (AND)
-val expensiveActiveCncs = repository.findBy(
-    ClassFilter(CncMachine::class.java),
-    GreaterThan("price", BigDecimal("50000")),
-    Equal("isActive", true)
+// Multiple filters (AND) - high capacity cars with many passengers
+val highCapacityCars = repository.findBy(
+    ClassFilter(Car::class.java),
+    GreaterThan("fuelCapacity", 100),
+    GreaterThan("passengers", 4)
 )
 ```
 
@@ -171,9 +165,9 @@ val expensiveActiveCncs = repository.findBy(
 
 ```kotlin
 val filters = listOf(
-    GreaterThanOrEqualTo("manufacturedAt", LocalDateTime.of(2024, 1, 1, 0, 0))
+    GreaterThanOrEqualTo("fuelCapacity", 100)
 )
-val orders = Orders(OrderModel("price", OrderModel.Direction.DESC))
+val orders = Orders(OrderModel("fuelCapacity", OrderModel.Direction.DESC))
 
 val searchModel = SearchModel(
     page = 0,
@@ -189,42 +183,43 @@ println("Total: ${result.total}, Page size: ${result.records.size}")
 ### Advanced: Groups & Nested
 
 ```kotlin
-// OR within AND
-val highEndOrNew = repository.findBy(
+// Trucks with high fuel capacity OR high cargo weight
+val highCapacityOrCargoTrucks = repository.findBy(
     And(
         Or(
-            GreaterThan("price", BigDecimal("100000")),
-            GreaterThan("manufacturedAt", LocalDateTime.now().minusYears(1))
+            GreaterThan("fuelCapacity", 200),
+            GreaterThan("cargoWeight", 10000)
         ),
-        ClassFilter(LatheMachine::class.java)
+        ClassFilter(Truck::class.java)
     )
 )
 
-// First/Last
-val priceDescOrders = Orders(OrderModel("price", OrderModel.Direction.DESC))
-val mostExpensiveCnc = repository.findFirst(priceDescOrders, ClassFilter(CncMachine::class.java))
+// First/Last - highest fuel capacity car
+val fuelDescOrders = Orders(OrderModel("fuelCapacity", OrderModel.Direction.DESC))
+val highestFuelCar: Car = repository.findFirst(fuelDescOrders, ClassFilter(Car::class.java))
 
-val priceAscOrders = Orders(OrderModel("price", OrderModel.Direction.ASC))
-val cheapest = repository.findLast(priceAscOrders)
+// lowest fuel capacity vehicle
+val fuelAscOrders = Orders(OrderModel("fuelCapacity", OrderModel.Direction.ASC))
+val lowestFuelVehicle: Vehicle = repository.findFirst(fuelAscOrders)
 
 // By IDs
-val machines = repository.findByIds(listOf(1L, 2L, 3L))
+val vehicles = repository.findByIds(listOf(1L, 2L, 3L))
 ```
 
 ### CRUD Examples (via Service)
 
 ```kotlin
 @Autowired
-lateinit var service: MachineService
+lateinit var service: VehicleService
 
 // Save
-val newCnc = CncMachine(
-    name = "New CNC",
-    price = BigDecimal("60000"),
-    manufacturedAt = LocalDateTime.now(),
-    spindleSpeed = 10000
+val newCar = Car(
+    brand = "Toyota",
+    model = "Camry",
+    fuelCapacity = 60,
+    passengers = 5
 )
-val saved = service.save(newCnc)
+val saved = service.save(newCar)
 
 // Delete
 service.delete(saved)
