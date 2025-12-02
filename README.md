@@ -9,6 +9,7 @@ Blu Data JPA is a powerful extension to Spring Data JPA for Spring Boot applicat
 - **Pagination & Sorting**: Built-in support for paginated results with custom orders
 - **Type-Safe**: Works seamlessly with Kotlin and Java entities
 - **Easy CRUD**: Extend `BluDbService` for standard operations
+- **Inheritance Support**: Full support for `@Inheritance` (SINGLE_TABLE) - query subclasses using `ClassFilter` or generic `cls` parameter
 
 ## Version Compatibility
 Depending on the Spring Boot version you are using, you need to use this version of the library:
@@ -48,7 +49,7 @@ dependencies {
 
 ## Example Entity
 
-Define a sample `Machine` entity with useful fields and an enum subtype:
+Define a base `Machine` entity using JPA SINGLE_TABLE inheritance with useful concrete subtypes:
 
 ```kotlin
 import jakarta.persistence.*
@@ -56,15 +57,14 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "machines")
-data class Machine(
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
+abstract class Machine(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
     val name: String,
-
-    val type: MachineType,
 
     val price: BigDecimal,
 
@@ -73,11 +73,33 @@ data class Machine(
     val isActive: Boolean = true
 )
 
-enum class MachineType {
-    CNC_MACHINE,
-    LATHE,
-    MILLING_MACHINE
-}
+@Entity
+@DiscriminatorValue("CNC_MACHINE")
+data class CncMachine(
+    val name: String,
+    val price: BigDecimal,
+    val manufacturedAt: LocalDateTime,
+    val isActive: Boolean = true,
+    val spindleSpeed: Int  // Subtype-specific field
+) : Machine(0L, name, price, manufacturedAt, isActive)
+
+@Entity
+@DiscriminatorValue("LATHE")
+data class LatheMachine(
+    val name: String,
+    val price: BigDecimal,
+    val manufacturedAt: LocalDateTime,
+    val isActive: Boolean = true
+) : Machine(0L, name, price, manufacturedAt, isActive)
+
+@Entity
+@DiscriminatorValue("MILLING_MACHINE")
+data class MillingMachine(
+    val name: String,
+    val price: BigDecimal,
+    val manufacturedAt: LocalDateTime,
+    val isActive: Boolean = true
+) : Machine(0L, name, price, manufacturedAt, isActive)
 ```
 
 ## Repository
@@ -126,19 +148,22 @@ import ir.bamap.blu.model.filter.Orders as Orders // Alias if needed
 lateinit var repository: MachineRepository
 
 // All active machines
-val active = repository.findBy(IsNotNull("isActive"))
+val active = repository.findBy(Equal("isActive", true))
 
-// By exact type
-val cncs = repository.findBy(Equal("type", MachineType.CNC_MACHINE))
+// CNC machines using ClassFilter
+val cncs = repository.findBy(ClassFilter(CncMachine::class.java))
+
+// Lathe machines using cls parameter (typed result)
+val lathes: List<LatheMachine> = repository.findBy(LatheMachine::class.java)
 
 // Name contains "CNC"
 val matching = repository.findBy(Like("name", "%CNC%"))
 
 // Multiple filters (AND)
 val expensiveActiveCncs = repository.findBy(
-    Equal("type", MachineType.CNC_MACHINE),
+    ClassFilter(CncMachine::class.java),
     GreaterThan("price", BigDecimal("50000")),
-    IsNotNull("isActive")
+    Equal("isActive", true)
 )
 ```
 
@@ -171,19 +196,16 @@ val highEndOrNew = repository.findBy(
             GreaterThan("price", BigDecimal("100000")),
             GreaterThan("manufacturedAt", LocalDateTime.now().minusYears(1))
         ),
-        Equal("type", MachineType.LATHE)
+        ClassFilter(LatheMachine::class.java)
     )
 )
 
 // First/Last
-val mostExpensive = repository.findFirst(
-    OrderModel("price", OrderModel.Direction.DESC),
-    Equal("type", MachineType.CNC_MACHINE)
-)
+val priceDescOrders = Orders(OrderModel("price", OrderModel.Direction.DESC))
+val mostExpensiveCnc = repository.findFirst(priceDescOrders, ClassFilter(CncMachine::class.java))
 
-val cheapest = repository.findLast(
-    OrderModel("price", OrderModel.Direction.ASC)
-)
+val priceAscOrders = Orders(OrderModel("price", OrderModel.Direction.ASC))
+val cheapest = repository.findLast(priceAscOrders)
 
 // By IDs
 val machines = repository.findByIds(listOf(1L, 2L, 3L))
@@ -196,8 +218,13 @@ val machines = repository.findByIds(listOf(1L, 2L, 3L))
 lateinit var service: MachineService
 
 // Save
-val newMachine = Machine(name = "New CNC", type = MachineType.CNC_MACHINE, price = BigDecimal("60000"), manufacturedAt = LocalDateTime.now())
-val saved = service.save(newMachine)
+val newCnc = CncMachine(
+    name = "New CNC",
+    price = BigDecimal("60000"),
+    manufacturedAt = LocalDateTime.now(),
+    spindleSpeed = 10000
+)
+val saved = service.save(newCnc)
 
 // Delete
 service.delete(saved)
