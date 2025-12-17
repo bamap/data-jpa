@@ -5,7 +5,7 @@
 
     <groupId>ir.bamap.blu</groupId>
     <artifactId>data-jpa</artifactId>
-    <version>1.1.10</version>
+    <version>1.1.11</version>
 
     <packaging>jar</packaging>
 
@@ -47,9 +47,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <model.version>1.1.5</model.version>
-        <hibernate.version>6.6.33.Final</hibernate.version>
-        <spring-data-jpa.version>3.5.5</spring-data-jpa.version>
+        <model.version>1.1.6</model.version>
+        <hibernate.version>6.6.36.Final</hibernate.version>
+        <spring-data-jpa.version>3.5.6</spring-data-jpa.version>
 
         <skip.source>false</skip.source>
         <skip.javadoc>false</skip.javadoc>
