@@ -40,7 +40,10 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
     }
 
     override fun findByIds(ids: Iterable<ID>): List<Entity> {
-        val inFilter = In(getIdProperty(), ids.toSet().toList())
+        val listIds = ids.toSet().toList()
+        if(listIds.isEmpty()) return emptyList()
+
+        val inFilter = In(getIdProperty(), listIds)
         return findBy(inFilter)
     }
 
