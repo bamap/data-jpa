@@ -6,8 +6,7 @@ import ir.bamap.blu.model.ResultSearchModel
 import ir.bamap.blu.model.filter.FilterModel
 import java.io.Serializable
 
-interface BluRepository<Entity: Any, ID: Serializable>
-{
+interface BluRepository<Entity : Any, ID : Serializable> {
     fun getEntityClass(): Class<Entity>
 
     //**************** Find One ****************
@@ -16,6 +15,7 @@ interface BluRepository<Entity: Any, ID: Serializable>
      * @return
      */
     fun findOrNull(id: ID): Entity?
+
     /**
      * @param cls
      * @param id
@@ -122,7 +122,9 @@ interface BluRepository<Entity: Any, ID: Serializable>
      * or closing the session. So after calling the method, entityObject has not id
      * @param entityObject the object to create
      */
-    fun <U : Entity>persist(entityObject: U)
+    fun <U : Entity> persist(entityObject: U)
+
+    fun <U : Entity> persistAll(entityObjects: List<U>): List<U>
 
     /**
      * The main intention of the merge method is to update an entity instance with new field values
@@ -131,6 +133,8 @@ interface BluRepository<Entity: Any, ID: Serializable>
      * @param entityObject
      */
     fun <U : Entity> merge(entityObject: U): U
+
+    fun <U : Entity> mergeAll(entityObjects: List<U>): List<U>
 
     /**
      * The method change "**persistent**" state object to "**detached**" state

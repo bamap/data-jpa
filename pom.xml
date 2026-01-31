@@ -5,7 +5,7 @@
 
     <groupId>ir.bamap.blu</groupId>
     <artifactId>data-jpa</artifactId>
-    <version>4.0.1.2</version>
+    <version>4.0.2</version>
 
     <packaging>jar</packaging>
 
@@ -48,21 +48,33 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring-boot.version>4.0.1</spring-boot.version>
-        <model.version>4.0.0</model.version>
+        <spring-boot.version>4.0.2</spring-boot.version>
+        <model.version>5.0.0</model.version>
+        <exception.version>1.0.4</exception.version>
     </properties>
 
     <dependencies>
 
         <dependency>
             <groupId>ir.bamap.blu</groupId>
+            <artifactId>exception</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+            <version>${exception.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ir.bamap.blu</groupId>
             <artifactId>model</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
             <version>${model.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-data-jpa</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

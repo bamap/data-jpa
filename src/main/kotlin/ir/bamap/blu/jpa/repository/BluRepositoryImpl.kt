@@ -41,7 +41,7 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
 
     override fun findByIds(ids: Iterable<ID>): List<Entity> {
         val listIds = ids.toSet().toList()
-        if(listIds.isEmpty()) return emptyList()
+        if (listIds.isEmpty()) return emptyList()
 
         val inFilter = In(getIdProperty(), listIds)
         return findBy(inFilter)
@@ -215,7 +215,12 @@ open class BluRepositoryImpl<Entity : Any, ID : Serializable> constructor(
     //**************** CRUD ****************
     override fun <U : Entity> persist(entityObject: U): Unit = entityManager.persist(entityObject)
 
+    override fun <U : Entity> persistAll(entityObjects: List<U>): List<U> =
+        entityObjects.onEach { entityManager.persist(it) }
+
     override fun <U : Entity> merge(entityObject: U): U = entityManager.merge(entityObject)
+    override fun <U : Entity> mergeAll(entityObjects: List<U>): List<U> =
+        entityObjects.onEach { entityManager.merge(it) }
 
     override fun detach(entityObject: Entity) = entityManager.detach(entityObject)
 
