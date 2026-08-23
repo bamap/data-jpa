@@ -2,6 +2,7 @@ package ir.bamap.blu.jpa.config
 
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Path
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
@@ -32,6 +33,7 @@ open class PathResolver {
             is Int -> root.get<Int>(propertyName)
             is Long -> root.get<Long>(propertyName)
             is Double -> root.get<Double>(propertyName)
+            is BigDecimal -> root.get<BigDecimal>(propertyName)
             is Float -> root.get<Float>(propertyName)
             is String -> root.get<String>(propertyName)
             is Date -> root.get<Date>(propertyName)

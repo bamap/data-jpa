@@ -7,6 +7,7 @@ import ir.bamap.blu.model.filter.FilterModel
 import ir.bamap.blu.model.filter.NotBetween
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
@@ -31,6 +32,7 @@ class BetweenToPredicateConverter : FilterToPredicateConverter<Between> {
             is Int -> builder.between(path as Path<Int>, lower.toString().toInt(), upper)
             is Long -> builder.between(path as Path<Long>, lower.toString().toLong(), upper)
             is Double -> builder.between(path as Path<Double>, lower.toString().toDouble(), upper)
+            is BigDecimal -> builder.between(path as Path<BigDecimal>, lower.toString().toBigDecimal(), upper)
             is Float -> builder.between(path as Path<Float>, lower.toString().toFloat(), upper)
             is Short -> builder.between(path as Path<Short>, lower.toString().toShort(), upper)
             is Char -> builder.between(path as Path<Char>, lower.toString()[0], upper)

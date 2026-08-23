@@ -18,6 +18,7 @@ import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
@@ -71,6 +72,7 @@ open class ComparativeToPredicateConverter : FilterToPredicateConverter<Comparat
             is Int -> builder.lessThan(path as Path<Int>, literal)
             is Long -> builder.lessThan(path as Path<Long>, literal)
             is Double -> builder.lessThan(path as Path<Double>, literal)
+            is BigDecimal -> builder.lessThan(path as Path<BigDecimal>, literal)
             is Float -> builder.lessThan(path as Path<Float>, literal)
             is Short -> builder.lessThan(path as Path<Short>, literal)
             is Char -> builder.lessThan(path as Path<Char>, literal)
@@ -93,6 +95,7 @@ open class ComparativeToPredicateConverter : FilterToPredicateConverter<Comparat
             is Int -> builder.lessThanOrEqualTo(path as Path<Int>, literal)
             is Long -> builder.lessThanOrEqualTo(path as Path<Long>, literal)
             is Double -> builder.lessThanOrEqualTo(path as Path<Double>, literal)
+            is BigDecimal -> builder.lessThanOrEqualTo(path as Path<BigDecimal>, literal)
             is Float -> builder.lessThanOrEqualTo(path as Path<Float>, literal)
             is Short -> builder.lessThanOrEqualTo(path as Path<Short>, literal)
             is Char -> builder.lessThanOrEqualTo(path as Path<Char>, literal)
@@ -115,6 +118,7 @@ open class ComparativeToPredicateConverter : FilterToPredicateConverter<Comparat
             is Int -> builder.greaterThanOrEqualTo(path as Path<Int>, literal)
             is Long -> builder.greaterThanOrEqualTo(path as Path<Long>, literal)
             is Double -> builder.greaterThanOrEqualTo(path as Path<Double>, literal)
+            is BigDecimal -> builder.greaterThanOrEqualTo(path as Path<BigDecimal>, literal)
             is Float -> builder.greaterThanOrEqualTo(path as Path<Float>, literal)
             is Short -> builder.greaterThanOrEqualTo(path as Path<Short>, literal)
             is Char -> builder.greaterThanOrEqualTo(path as Path<Char>, literal)
@@ -137,6 +141,7 @@ open class ComparativeToPredicateConverter : FilterToPredicateConverter<Comparat
             is Int -> builder.greaterThan(path as Path<Int>, literal)
             is Long -> builder.greaterThan(path as Path<Long>, literal)
             is Double -> builder.greaterThan(path as Path<Double>, literal)
+            is BigDecimal -> builder.greaterThan(path as Path<BigDecimal>, literal)
             is Float -> builder.greaterThan(path as Path<Float>, literal)
             is Short -> builder.greaterThan(path as Path<Short>, literal)
             is Char -> builder.greaterThan(path as Path<Char>, literal)
